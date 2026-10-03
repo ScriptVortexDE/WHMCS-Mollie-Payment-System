@@ -1,97 +1,26 @@
 <?php
+
 /**
+ * Mollie webhook endpoint.
  *
- *    Setting requirements and includes
- *
+ * Mollie only posts the payment id; the actual status is always fetched from
+ * the Mollie API, so the request itself does not need to be trusted.
  */
+
 require_once __DIR__ . '/../../../init.php';
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/../../../includes/gatewayfunctions.php';
+require_once __DIR__ . '/../../../includes/invoicefunctions.php';
+require_once __DIR__ . '/bootstrap.php';
 
-$whmcs->load_function('gateway');
-$whmcs->load_function('invoice');
+use ScriptVortex\WhmcsMollie\Gateway;
 
-/**
- *
- *    Check parameters
- *
- */
-if (isset($_POST['id'])) {
+$paymentId = trim((string) ($_POST['id'] ?? ''));
 
-    // Get transaction
-    $transactionQuery = select_query('gateway_mollie', '', array('paymentid' => $_POST['id']), null, null, 1);
-
-    if (mysql_num_rows($transactionQuery) != 1) {
-        logTransaction('mollieunknown', $_POST, 'Callback - Failure 2 (Transaction not found)');
-
-        header('HTTP/1.1 500 Transaction not found');
-        exit();
-    }
-
-    $transaction = mysql_fetch_assoc($transactionQuery);
-
-    $method = $transaction['method'];
-
-    if (empty($method)) {
-        $method = 'checkout';
-    }
-
-    $_GATEWAY = getGatewayVariables('mollie' . $method . '_devapp');
-
-    if ($transaction['status'] != 'open') {
-        logTransaction($_GATEWAY['paymentmethod'], array_merge($transaction, $_POST), 'Callback - Failure 3 (Transaction not open)');
-
-        header('HTTP/1.1 500 Transaction not open');
-        exit();
-    }
-
-    // Get user and transaction currencies
-    $userCurrency = getCurrency($transaction['userid']);
-    $transactionCurrency = select_query('tblcurrencies', '', array('id' => $transaction['currencyid']));
-    $transactionCurrency = mysql_fetch_assoc($transactionCurrency);
-
-    // Check payment
-    $mollie = new \Mollie\Api\MollieApiClient();
-    $mollie->setApiKey($_GATEWAY['key']);
-
-    $payment = $mollie->payments->get($_POST['id']);
-
-    if ($payment->isPaid()) {
-
-        // Add conversion, when there is need to. WHMCS only supports currencies per user. WHY?!
-        if ($transactionCurrency['id'] != $userCurrency['id']) {
-            $transaction['amount'] = convertCurrency($transaction['amount'], $transaction['currencyid'], $userCurrency['id']);
-        }
-
-        // Check invoice
-        $invoiceid = checkCbInvoiceID($transaction['invoiceid'], $_GATEWAY['paymentmethod']);
-
-        checkCbTransID($transaction['paymentid']);
-
-        // Add invoice
-        addInvoicePayment($invoiceid, $transaction['paymentid'], $transaction['amount'], '', $_GATEWAY['paymentmethod']);
-
-        update_query('gateway_mollie', array('status' => 'paid', 'updated' => date('Y-m-d H:i:s', time())), array('id' => $transaction['id']));
-
-        logTransaction($_GATEWAY['paymentmethod'], array_merge($transaction, $_POST), 'Callback - Successful (Paid)');
-
-        header('HTTP/1.1 200 OK');
-        exit();
-    } else if ($payment->isOpen() == FALSE) {
-        update_query('gateway_mollie', array('status' => 'closed', 'updated' => date('Y-m-d H:i:s', time())), array('id' => $transaction['id']));
-
-        logTransaction($_GATEWAY['paymentmethod'], array_merge($transaction, $_POST), 'Callback - Successful (Closed)');
-
-        header('HTTP/1.1 200 OK');
-        exit();
-    } else {
-        logTransaction($_GATEWAY['paymentmethod'], array_merge($transaction, $_POST), 'Callback - Failure 1 (Payment not open or paid)');
-
-        header('HTTP/1.1 500 Payment not open or paid');
-        exit();
-    }
-} else {
-    logTransaction('mollieunknown', $_POST, 'Callback - Failure 0 (Arg mismatch)');
-
-    header('HTTP/1.1 500 Arg mismatch');
-    exit();
+if (!preg_match('/^tr_[A-Za-z0-9]+$/', $paymentId)) {
+    logTransaction('Mollie', $_POST, 'Webhook - Invalid request');
+    http_response_code(400);
+    exit;
 }
+
+http_response_code(Gateway::handleWebhook($paymentId));
+exit;

@@ -1,26 +1,23 @@
 <?php
 
-$_GATEWAYLANG = array();
-
-$_GATEWAYLANG['selectBank'] = 'Select bank';
-
-$_GATEWAYLANG['errorTransactionNotFound'] = 'Transaction is not found. Please try again.';
-
-$_GATEWAYLANG['checkPayment'] = 'Checking your payment, please wait...';
-
-$_GATEWAYLANG['payWithBanktransfer'] = 'Pay with Bank Transfer';
-$_GATEWAYLANG['payWithBelfius'] = 'Pay with Belfius';
-$_GATEWAYLANG['payWithCreditcard'] = 'Pay with Credit Card';
-$_GATEWAYLANG['payWithIdeal'] = 'Pay with iDeal';
-$_GATEWAYLANG['payWithBancontact'] = 'Pay with Bancontact';
-$_GATEWAYLANG['payWithPaypal'] = 'Pay with PayPal';
-$_GATEWAYLANG['payWithPaysafecard'] = 'Pay with Paysafecard';
-$_GATEWAYLANG['payWithSofort'] = 'Pay with Sofort Banking';
-$_GATEWAYLANG['payWithEps'] = 'Pay with EPS';
-$_GATEWAYLANG['payWithGiftcard'] = 'Pay with a gift card';
-$_GATEWAYLANG['payWithGiropay'] = 'Pay with Giropay';
-$_GATEWAYLANG['payWithInghomepay'] = 'Pay with ING Home\'Pay';
-$_GATEWAYLANG['payWithKbc'] = 'Pay with KBC/CBC Payment Button';
-$_GATEWAYLANG['payWithPrzelewy24'] = 'Pay with Przelewy24';
-$_GATEWAYLANG['payWithApplepay'] = 'Pay with Apple Pay';
-$_GATEWAYLANG['payWith'] = 'Pay with Mollie';
+return [
+    'payWith' => 'Pay with %s',
+    'checkPayment' => 'Checking your payment, please wait...',
+    'paymentPending' => 'Your payment is still being processed. You will receive a confirmation as soon as it has been completed.',
+    'errorTransactionNotFound' => 'Transaction not found. Please try again.',
+    'errorStartPayment' => 'The payment could not be started. Please try again or choose a different payment method.',
+    'testMode' => 'Test mode active - no real payment will be made.',
+    'bankTransferTitle' => 'Bank transfer details',
+    'bankTransferInstructions' => 'Please transfer the amount below, stating the reference. Your invoice will be marked as paid once the transfer has been received.',
+    'bankName' => 'Bank',
+    'bankAccount' => 'IBAN',
+    'bankBic' => 'BIC',
+    'reference' => 'Reference',
+    'amount' => 'Amount',
+    'methods' => [
+        'banktransfer' => 'Bank Transfer',
+        'creditcard' => 'Credit Card',
+        'giftcard' => 'a gift card',
+        'paybybank' => 'Pay by Bank',
+    ],
+];

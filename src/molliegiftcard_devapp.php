@@ -1,22 +1,33 @@
 <?php
 
-require_once __DIR__ . '/mollie/mollie.php';
+/**
+ * Mollie Gift Card - WHMCS payment gateway.
+ */
+
+if (!defined('WHMCS')) {
+    die('This file cannot be accessed directly');
+}
+
+require_once __DIR__ . '/mollie/bootstrap.php';
+
+use ScriptVortex\WhmcsMollie\Gateway;
+
+function molliegiftcard_devapp_MetaData()
+{
+    return Gateway::metaData('Mollie Gift Card');
+}
 
 function molliegiftcard_devapp_config()
 {
-    $config = mollie_config();
-
-    $config = array_merge($config, array(
-        'FriendlyName' => array(
-            'Type' => 'System',
-            'Value' => 'Mollie Giftcard'
-        )
-    ));
-
-    return $config;
+    return Gateway::config('Mollie Gift Card');
 }
 
 function molliegiftcard_devapp_link($params)
 {
-    return mollie_link($params, \Mollie\Api\Types\PaymentMethod::GIFTCARD);
+    return Gateway::link($params, 'giftcard', 'Gift Card');
+}
+
+function molliegiftcard_devapp_refund($params)
+{
+    return Gateway::refund($params);
 }

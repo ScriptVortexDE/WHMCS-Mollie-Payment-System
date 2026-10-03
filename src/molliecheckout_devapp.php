@@ -1,23 +1,33 @@
 <?php
 
-require_once __DIR__ . '/mollie/mollie.php';
+/**
+ * Mollie Checkout - WHMCS payment gateway.
+ */
+
+if (!defined('WHMCS')) {
+    die('This file cannot be accessed directly');
+}
+
+require_once __DIR__ . '/mollie/bootstrap.php';
+
+use ScriptVortex\WhmcsMollie\Gateway;
+
+function molliecheckout_devapp_MetaData()
+{
+    return Gateway::metaData('Mollie Checkout');
+}
 
 function molliecheckout_devapp_config()
 {
-    $config = mollie_config();
-
-    $config = array_merge($config, array(
-        'FriendlyName' => array(
-            'Type' => 'System',
-            'Value' => 'Mollie Checkout'
-        )
-    ));
-
-    return $config;
+    return Gateway::config('Mollie Checkout');
 }
 
 function molliecheckout_devapp_link($params)
 {
-    return mollie_link($params, null);
+    return Gateway::link($params, null, 'Mollie');
 }
 
+function molliecheckout_devapp_refund($params)
+{
+    return Gateway::refund($params);
+}

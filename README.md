@@ -1,28 +1,47 @@
 # WHMCS-Mollie-Payment-System
 Mollie Integration für WHMCS v9
 
-> Basiert auf dem MIT-lizenzierten Projekt [0100Dev/WHMCS-Mollie-Payments](https://github.com/0100Dev/WHMCS-Mollie-Payments).
+> Basiert auf dem MIT-lizenzierten Projekt [0100Dev/WHMCS-Mollie-Payments](https://github.com/0100Dev/WHMCS-Mollie-Payments), für WHMCS 9 / PHP 8.2+ neu aufgebaut.
 
----
+## Anforderungen
+- WHMCS 9.x (WHMCS 8.x mit PHP 8.2+ sollte ebenfalls funktionieren)
+- PHP 8.2 oder höher mit der Erweiterung `curl`
+- Ein [Mollie](https://www.mollie.com/)-Konto mit API-Key
 
-## WHMCS Mollie Payments gateway ![GitHub All Releases](https://img.shields.io/github/downloads/0100Dev/WHMCS-Mollie-Payments/total) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/0100Dev/WHMCS-Mollie-Payments)
-Unofficial Mollie Payments gateway for WHMCS. This free gateway does NOT support Mollie Recurring, only Molie Payments. For Mollie Recurring we have a [paid](https://0100dev.nl/modules/whmcs#WHMCS%20Mollie%20Recurring) gateway. These gateways are not dependent on each other and can operate side by side, but also without each other.
+Das Modul hat **keine Composer-Abhängigkeiten** mehr. Es spricht die Mollie API v2 direkt über cURL an und kann deshalb nicht mit den Bibliotheken kollidieren, die WHMCS selbst mitbringt (Guzzle, PSR usw.).
 
-Compatible with **all** WHMCS versions that are [supported by WHMCS](https://docs.whmcs.com/Long_Term_Support#WHMCS_Version_.26_LTS_Schedule).
+## Installation
+1. Die `WHMCS-Mollie-Payments.zip` von der [Releases-Seite](https://github.com/ScriptVortexDE/WHMCS-Mollie-Payment-System/releases) herunterladen, alternativ den Ordner `src` aus dem Repository verwenden.
+2. Den **Inhalt** des Ordners `src` nach `/modules/gateways/` deiner WHMCS-Installation hochladen.
+3. In WHMCS unter *System Settings > Payment Gateways* die gewünschten Mollie-Zahlungsarten aktivieren.
+4. Bei jeder aktivierten Zahlungsart den **Live API key** eintragen (optional den **Test API key** und *Test mode*).
 
-### Installation
-+ Log in to your (s)FTP.
-+ Download the `WHMCS-Mollie-Payments.zip` from the [releases page](https://github.com/0100Dev/WHMCS-Mollie/releases) (**PLEASE NOTE:** **not** `Source code (zip)` or `Source code (tar.gz)`!).
-+ Upload all the files from the `src` folder to the `/modules/gateways` folder in your WHMCS installation.
+Die Zahlungsarten müssen außerdem im Mollie-Dashboard freigeschaltet sein.
 
-### Payment Methodes
-All payment methods from Mollie are supported (which is also supported by their API). Enable the desired payment methods by activating the gateway in WHMCS.
+## Zahlungsarten
+| Modul | Mollie-Methode |
+|---|---|
+| Mollie Checkout | Mollie-Bezahlseite mit allen im Mollie-Konto aktiven Methoden |
+| Alma, Klarna, in3 | Pay later (Rechnungsadresse und Rechnungsposition werden automatisch übergeben) |
+| Apple Pay, Credit Card, PayPal | Karten und Wallets |
+| Bancontact, Belfius, KBC/CBC, iDEAL, EPS, Przelewy24, BLIK, MyBank, Trustly, Pay by Bank | Online-Banking |
+| Bank Transfer | Überweisung (Bankdaten werden nach dem Checkout angezeigt) |
+| TWINT, Satispay, Bancomat Pay, Bizum, MB WAY, Multibanco, MobilePay, Vipps, Swish, Wero | Lokale Zahlungsarten |
+| Gift Card, paysafecard | Gutscheine und Prepaid |
 
-Support for new payment methods must be added manually, due to the structure of this gateway. It can therefore take a while before a new payment method is supported. Is it urgent? Contact our paid support or add support for it yourself and contribute it back using a pull request.
+## Funktionen
+- Webhook-Verarbeitung **und** direkte Statusprüfung, wenn der Kunde zurückkehrt (die Rechnung wird sofort als bezahlt markiert)
+- Schutz gegen doppelte Verbuchung, wenn Webhook und Rückleitung gleichzeitig eintreffen
+- Bei einem Neuladen der Seite wird die offene Mollie-Zahlung wiederverwendet, statt eine neue anzulegen
+- **Rückerstattungen** direkt aus WHMCS (*Invoice > Refund*)
+- **Testmodus** mit separatem Test-API-Key
+- Mollie-Bezahlseite in der Sprache des Kunden (Sprachdateien: Englisch, Deutsch, Niederländisch)
+- API-Aufrufe erscheinen im WHMCS-Modul-Log (*Utilities > Logs > Module Log*), der API-Key wird dort maskiert
 
-You can use `Mollie Checkout` to use the Mollie Payments checkout pages. In this case it'll use the Mollie Payments checkout screen and show all enabled payment methodes in your Mollie account.
+## Update vom 0100Dev-Modul
+- Die Tabelle `gateway_mollie` wird weiterverwendet und automatisch erweitert. Offene Zahlungen bleiben gültig.
+- **Giropay** und **SOFORT** wurden von Mollie eingestellt. Deaktiviere sie in WHMCS **vor** dem Update und lösche danach `molliegiropay_devapp.php` und `molliesofort_devapp.php`.
+- Die alten Dateien `modules/gateways/mollie/mollie.php` und `modules/gateways/mollie/vendor/` werden nicht mehr benötigt und können gelöscht werden.
 
-### Support
-Support is best-effort through the Github issue tracker. Business support (responsetime within 24 hours, normally less then 1 hour) through our [website](https://0100dev.nl/) against our hourly rate at € 75,- excl. VAT. Please create an account at our website before contacting us.
-
-[More information through Mollie about Mollie Payments](https://www.mollie.com/en/payments)
+## Lizenz
+MIT, siehe [LICENSE](LICENSE).

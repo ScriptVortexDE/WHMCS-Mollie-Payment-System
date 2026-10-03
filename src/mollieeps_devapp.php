@@ -1,22 +1,33 @@
 <?php
 
-require_once __DIR__ . '/mollie/mollie.php';
+/**
+ * Mollie EPS - WHMCS payment gateway.
+ */
+
+if (!defined('WHMCS')) {
+    die('This file cannot be accessed directly');
+}
+
+require_once __DIR__ . '/mollie/bootstrap.php';
+
+use ScriptVortex\WhmcsMollie\Gateway;
+
+function mollieeps_devapp_MetaData()
+{
+    return Gateway::metaData('Mollie EPS');
+}
 
 function mollieeps_devapp_config()
 {
-    $config = mollie_config();
-
-    $config = array_merge($config, array(
-        'FriendlyName' => array(
-            'Type' => 'System',
-            'Value' => 'Mollie EPS'
-        )
-    ));
-
-    return $config;
+    return Gateway::config('Mollie EPS');
 }
 
 function mollieeps_devapp_link($params)
 {
-    return mollie_link($params, \Mollie\Api\Types\PaymentMethod::EPS);
+    return Gateway::link($params, 'eps', 'EPS');
+}
+
+function mollieeps_devapp_refund($params)
+{
+    return Gateway::refund($params);
 }

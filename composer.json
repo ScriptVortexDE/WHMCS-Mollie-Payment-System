@@ -1,8 +1,0 @@
-{
-  "require": {
-    "mollie/mollie-api-php": "^2.0"
-  },
-  "config": {
-    "vendor-dir": "src/mollie/vendor"
-  }
-}
